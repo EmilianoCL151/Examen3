@@ -1,0 +1,6 @@
+com\upiiz\Examen3\controllers\ProductoController.class
+com\upiiz\Examen3\models\ProductoModel.class
+com\upiiz\Examen3\controllers\HomeController.class
+com\upiiz\Examen3\Examen3Application.class
+com\upiiz\Examen3\servicies\ProductoService.class
+com\upiiz\Examen3\repositories\ProductoRepository.class

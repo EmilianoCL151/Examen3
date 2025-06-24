@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Productos | UPIIZ</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/datatables.min.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-color) 0%, #224abe 100%);
+            min-height: 100vh;
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse px-0">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white"><i class="fas fa-store-alt me-2"></i>TIENDA UPIIZ</h4>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#">
+                            <i class="fas fa-boxes me-2"></i>Productos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#">
+                            <i class="fas fa-tags me-2"></i>Categorías
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2"><i class="fas fa-box-open me-2"></i>Gestión de Productos</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProducto">
+                    <i class="fas fa-plus-circle me-1"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <!-- Tarjeta de Resumen -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Productos</h5>
+                            <h2 id="totalProductos" class="mb-0">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">En Stock</h5>
+                            <h2 id="totalStock" class="mb-0">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Productos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-white">
+                        <i class="fas fa-table me-1"></i> Lista de Productos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="tablaProductos" class="table table-striped table-hover" style="width:100%">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal para Productos -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle">Nuevo Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formProducto" class="row g-3">
+                    <input type="hidden" id="productoId">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                        <div class="invalid-feedback">Debe tener al menos 3 caracteres</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="precio" class="form-label">Precio ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" class="form-control" id="precio" required>
+                        </div>
+                        <div class="invalid-feedback">Debe ser mayor que 0</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="stock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="stock" required>
+                        <div class="invalid-feedback">No puede ser negativo</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoria" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Electrónicos">Electrónicos</option>
+                            <option value="Ropa">Ropa</option>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Hogar">Hogar</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione una categoría</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="button" id="btnGuardar" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarAccion">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/datatables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        // Variables globales
+        let tablaProductos;
+        let productoSeleccionado = null;
+
+        // Inicializar DataTable
+        function initDataTable() {
+            tablaProductos = $('#tablaProductos').DataTable({
+                ajax: {
+                    url: '/v1/api/productos',
+                    dataSrc: '',
+                    error: function(xhr) {
+                        Swal.fire('Error', 'No se pudieron cargar los productos', 'error');
+                    }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'nombre' },
+                    {
+                        data: 'precio',
+                        render: function(data) {
+                            return '$' + parseFloat(data).toFixed(2);
+                        }
+                    },
+                    {
+                        data: 'stock',
+                        render: function(data, type, row) {
+                            const badgeClass = data > 0 ? 'bg-success' : 'bg-danger';
+                            return `<span class="badge ${badgeClass}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'categoria',
+                        render: function(data) {
+                            return `<span class="badge bg-info">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data) {
+                            return `
+                                <button class="btn btn-sm btn-warning btn-editar" data-id="${data.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-eliminar" data-id="${data.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            `;
+                        },
+                        orderable: false
+                    }
+                ],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                drawCallback: function() {
+                    updateStats();
+                }
+            });
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            $.get('/v1/api/productos', function(data) {
+                $('#totalProductos').text(data.length);
+                const totalStock = data.reduce((sum, product) => sum + product.stock, 0);
+                $('#totalStock').text(totalStock);
+            });
+        }
+
+        // Validar formulario
+        function validarFormulario() {
+            let isValid = true;
+            const nombre = $('#nombre').val().trim();
+            const precio = parseFloat($('#precio').val());
+            const stock = parseInt($('#stock').val());
+            const categoria = $('#categoria').val();
+
+            // Validar nombre
+            if (nombre.length < 3) {
+                $('#nombre').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#nombre').removeClass('is-invalid');
+            }
+
+            // Validar precio
+            if (isNaN(precio) || precio <= 0) {
+                $('#precio').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#precio').removeClass('is-invalid');
+            }
+
+            // Validar stock
+            if (isNaN(stock) || stock < 0) {
+                $('#stock').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#stock').removeClass('is-invalid');
+            }
+
+            // Validar categoría
+            if (!categoria) {
+                $('#categoria').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#categoria').removeClass('is-invalid');
+            }
+
+            return isValid;
+        }
+
+        // Limpiar formulario
+        function limpiarFormulario() {
+            $('#formProducto')[0].reset();
+            $('#productoId').val('');
+            $('.is-invalid').removeClass('is-invalid');
+            $('#modalTitle').text('Nuevo Producto');
+        }
+
+        // Guardar producto
+        $('#btnGuardar').click(function() {
+            if (!validarFormulario()) return;
+
+            const producto = {
+                id: $('#productoId').val() || 0,
+                nombre: $('#nombre').val().trim(),
+                precio: $('#precio').val(),
+                stock: $('#stock').val(),
+                categoria: $('#categoria').val()
+            };
+
+            const metodo = producto.id ? 'PUT' : 'POST';
+            const url = producto.id ? `/v1/api/producto/${producto.id}` : '/v1/api/producto';
+
+            $.ajax({
+                url: url,
+                type: metodo,
+                contentType: 'application/json',
+                data: JSON.stringify(producto),
+                success: function(response) {
+                    if (response.estado === 1) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: producto.id ? 'Producto actualizado' : 'Producto creado',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        tablaProductos.ajax.reload();
+                        $('#modalProducto').modal('hide');
+                    } else {
+                        Swal.fire('Error', response.mensaje, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.mensaje || 'Error desconocido', 'error');
+                }
+            });
+        });
+
+        // Editar producto
+        $(document).on('click', '.btn-editar', function() {
+            const id = $(this).data('id');
+            $.get(`/v1/api/productos`, function(data) {
+                const producto = data.find(p => p.id == id);
+                if (producto) {
+                    $('#productoId').val(producto.id);
+                    $('#nombre').val(producto.nombre);
+                    $('#precio').val(producto.precio);
+                    $('#stock').val(producto.stock);
+                    $('#categoria').val(producto.categoria);
+                    $('#modalTitle').text('Editar Producto');
+                    $('#modalProducto').modal('show');
+                }
+            });
+        });
+
+        // Eliminar producto
+        $(document).on('click', '.btn-eliminar', function() {
+            const id = $(this).data('id');
+            productoSeleccionado = id;
+
+            $('#confirmMessage').html(`
+                <p>¿Estás seguro de eliminar este producto?</p>
+                <p class="fw-bold">Esta acción no se puede deshacer.</p>
+            `);
+            $('#btnConfirmarAccion').off('click').on('click', confirmarEliminacion);
+            $('#modalConfirmar').modal('show');
+        });
+
+        function confirmarEliminacion() {
+            $.ajax({
+                url: `/v1/api/producto/${productoSeleccionado}`,
+                type: 'DELETE',
+                success: function(response) {
+                    if (response.estado === 1) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Eliminado!',
+                            text: 'Producto eliminado correctamente',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        tablaProductos.ajax.reload();
+                    } else {
+                        Swal.fire('Error', response.mensaje, 'error');
+                    }
+                    $('#modalConfirmar').modal('hide');
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.mensaje || 'Error al eliminar', 'error');
+                    $('#modalConfirmar').modal('hide');
+                }
+            });
+        }
+
+        // Inicializar
+        initDataTable();
+
+        // Evento al cerrar modal
+        $('#modalProducto').on('hidden.bs.modal', function() {
+            limpiarFormulario();
+        });
+    });
+</script>
+</body>
+</html>
